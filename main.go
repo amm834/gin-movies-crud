@@ -57,11 +57,22 @@ func deleteMovieById(context *gin.Context) {
 }
 
 func updateMovie(context *gin.Context) {
-	var newUpdatedMovie Movie
 
-	if err := context.BindJSON(&newUpdatedMovie); err != nil {
-		context.JSON(http.StatusBadRequest, err.Error())
-		return
+	id := context.Param("id")
+
+	for idx, movie := range movies {
+		if movie.Id == id {
+			movies = append(movies[:idx], movies[idx+1:]...)
+
+			var newMovie Movie
+			if err := context.BindJSON(&newMovie); err != nil {
+				context.JSON(http.StatusBadRequest, err.Error())
+				return
+			}
+
+			movies = append(movies, newMovie)
+			context.IndentedJSON(http.StatusOK, id)
+		}
 	}
 }
 
@@ -70,8 +81,8 @@ func getMovieById(context *gin.Context) {
 
 	for _, movie := range movies {
 		if movie.Id == id {
-			context.IndentedJSON(http.StatusOK, movie)
-			return
+			context.IndentedJSON(http.StatusNoContent, "")
+			break
 		}
 	}
 }
